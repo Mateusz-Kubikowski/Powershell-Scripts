@@ -1,4 +1,10 @@
-﻿#Variables
+How should content of Users.csv look like
+TomWitkins
+JohnMcKennedy
+AdamSandler
+
+ 
+ #Variables
 $PathToFileWithUsers = "\\Contoso.com\data\Users.csv"
 $PathToLogFiles =  "\\Contoso.com\data"
 

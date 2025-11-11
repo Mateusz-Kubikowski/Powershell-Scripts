@@ -1,4 +1,4 @@
-$global:hostname_intrumssodev =([System.Net.Dns]::GetHostByName($env:computerName)).HostName| ConvertTo-Json
+$global:hostname =([System.Net.Dns]::GetHostByName($env:computerName)).HostName| ConvertTo-Json
 $a = "error"
 $a = (Get-ADUser -Filter *).Count
 $global:users = "$a"

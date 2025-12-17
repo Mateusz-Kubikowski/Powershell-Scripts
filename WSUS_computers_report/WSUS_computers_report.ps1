@@ -23,6 +23,7 @@ foreach ($wsusgroup in $wsusgroups) {
             $table += [PSCustomObject]@{
             Hostname = $comp
             Groupname = $wsusgroup
+            IP = $computer.IPAddress
             }
         }
 

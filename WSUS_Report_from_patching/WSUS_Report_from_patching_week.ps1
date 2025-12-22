@@ -188,7 +188,7 @@ $wsus = Get-WsusServer -Name "$env:COMPUTERNAME.$domain" -Port 8531 -UseSsl
 # Get all updates and filter for cumulative updates (excluding .NET Framework)
 $ThisPatchingMonth = $Patchingweek[0].date.Month.ToString()
 $ThisPatchingYear = $Patchingweek[0].date.year.ToString()
-#$FullListOfUpdates = Get-WsusUpdate -Classification Security -Approval Approved -Status Any
+$FullListOfUpdates = Get-WsusUpdate -Classification Security -Approval Approved -Status Any
 $UpdatesOnlyFromThisMonth = $FullListOfUpdates | Select update -ExpandProperty update | where {$_.title -like $ThisPatchingYear+"-"+$ThisPatchingMonth+"*"} | select id -ExpandProperty id | select updateid -ExpandProperty UpdateId | select guid -ExpandProperty guid
 
 # Prepare report

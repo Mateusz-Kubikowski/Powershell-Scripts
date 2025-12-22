@@ -1,4 +1,4 @@
-  # Function to check actual patching cycle
+# Function to check actual patching cycle
    
    function Get-NextPatchingWeek {
     $totall = @()  # Initialize $totall as an empty array
@@ -145,7 +145,7 @@
 }
 
 # Get last Friday, Saturday, and Sunday
-$today = (Get-Date).Date 
+$today = (Get-Date).Date.AddDays(-7) 
 $dayOfWeek = $today.DayOfWeek
 $daysBack = if ($dayOfWeek -eq 'Monday') { 3 } else { (7 + $dayOfWeek - [int][System.DayOfWeek]::Monday) % 7 + 3 }
 
@@ -169,24 +169,21 @@ $domain = Get-WmiObject -Namespace root\cimv2 -Class Win32_ComputerSystem | Sele
 $WsusServer = $name+"."+$domain
 
 # Import WSUS module
-[reflection.assembly]::LoadWithPartialName("Microsoft.UpdateServices.Administration")
+Import-Module UpdateServices
 
 # Connect to WSUS server using SSL and port 8531
-$wsus = [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer($wsusServer, $true, 8531)
+$domain = Get-ADDomain | select * | select forest -ExpandProperty forest
+$wsus = Get-WsusServer -Name "$env:COMPUTERNAME.$domain" -Port 8531 -UseSsl
 
 # Get all updates and filter for cumulative updates (excluding .NET Framework)
-$cumulativeUpdates = $wsus.GetUpdates() | Where-Object { 
-    $_.IsApproved -eq 'true' -and
-    $_.UpdateClassificationTitle -eq 'Security Updates' -and
-    $_.Title -match "Cumulative Update" -and 
-    $_.Title -notmatch "Cumulative Update for .NET Framework" -and
-    $_.CreationDate -gt (Get-Date).AddMonths(-1)
-}
-
-#$wsus.GetUpdates() potrafi crashować bazę danych. Lepszym rozwiązaniem będzie na przykład Get-WsusUpdate -Classification Security -Approval Approved -Status Any | Sort-Object -Descending title i wybieranie patchy. Albo np zaciągnięcie z Windows Update Catalogu ID patchy na dany miesiąc i użycie Get-WsusUpdate -UpdateId 3372cfa2-8cbf-4be8-98bf-9c680f7b2ad0
+$ThisPatchingMonth = $Patchingweek[0].date.Month.ToString()
+$ThisPatchingYear = $Patchingweek[0].date.year.ToString()
+$FullListOfUpdates = Get-WsusUpdate -Classification Security -Approval Approved -Status Any
+$UpdatesOnlyFromThisMonth = $FullListOfUpdates | Select update -ExpandProperty update | where {$_.title -like $ThisPatchingYear+"-"+$ThisPatchingMonth+"*"} | select id -ExpandProperty id | select updateid -ExpandProperty UpdateId | select guid -ExpandProperty guid
 
 # Prepare report
 $report = @()
+
 
 # Iterate through the target groups
 foreach ($targetGroup in $LastPatchingGroups) {
@@ -204,8 +201,8 @@ foreach ($targetGroup in $LastPatchingGroups) {
 
             foreach ($status in $statuses) {
                 # Check if the update is in the list of cumulative updates and is Failed or Needed
-                if ($cumulativeUpdates -contains $status.GetUpdate() -and `
-                    ($status.UpdateInstallationState -eq "Failed" -or $status.UpdateInstallationState -eq "needed")) {
+                if ($UpdatesOnlyFromThisMonth -eq $status.updateid -and `
+                    ($status.UpdateInstallationState -eq "Failed" -or $status.UpdateInstallationState -eq "Downloaded")) {
 
                     # Add entry to the report
                     $report += [PSCustomObject]@{

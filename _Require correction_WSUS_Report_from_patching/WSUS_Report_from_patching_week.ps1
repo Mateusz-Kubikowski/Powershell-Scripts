@@ -183,6 +183,8 @@ $cumulativeUpdates = $wsus.GetUpdates() | Where-Object {
     $_.CreationDate -gt (Get-Date).AddMonths(-1)
 }
 
+#$wsus.GetUpdates() potrafi crashować bazę danych. Lepszym rozwiązaniem będzie na przykład Get-WsusUpdate -Classification Security -Approval Approved -Status Any | Sort-Object -Descending title i wybieranie patchy. Albo np zaciągnięcie z Windows Update Catalogu ID patchy na dany miesiąc i użycie Get-WsusUpdate -UpdateId 3372cfa2-8cbf-4be8-98bf-9c680f7b2ad0
+
 # Prepare report
 $report = @()
 

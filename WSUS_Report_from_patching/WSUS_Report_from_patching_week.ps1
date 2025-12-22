@@ -10,7 +10,7 @@
 
 # Function to check actual patching cycle
    
-   function Get-NextPatchingWeek {
+   function Get-PatchingWeeks {
     $totall = @()  # Initialize $totall as an empty array
 
     $today = Get-Date
@@ -164,7 +164,7 @@ $lastSaturday = $lastFriday.AddDays(1)
 $lastSunday = $lastFriday.AddDays(2)
 
 # Get Last Patching cycle weekend
-$Patchingweek = Get-NextPatchingWeek
+$Patchingweek = Get-PatchingWeeks
 $LastPatchingCycle = $Patchingweek | where {$_.date -eq $lastFriday -or $_.date -eq $lastSaturday -or $_.date -eq $lastSunday}
 $LastPatchingGroups = $LastPatchingCycle | select CyclePoint -ExpandProperty CyclePoint
 

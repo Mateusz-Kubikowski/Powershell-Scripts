@@ -182,13 +182,13 @@ $WsusServer = $name+"."+$domain
 Import-Module UpdateServices
 
 # Connect to WSUS server using SSL and port 8531
-$domain = Get-ADDomain | select * | select forest -ExpandProperty forest
+$domain = Get-WmiObject -Namespace root\cimv2 -Class Win32_ComputerSystem | select domain -ExpandProperty domain
 $wsus = Get-WsusServer -Name "$env:COMPUTERNAME.$domain" -Port 8531 -UseSsl
 
 # Get all updates and filter for cumulative updates (excluding .NET Framework)
 $ThisPatchingMonth = $Patchingweek[0].date.Month.ToString()
 $ThisPatchingYear = $Patchingweek[0].date.year.ToString()
-$FullListOfUpdates = Get-WsusUpdate -Classification Security -Approval Approved -Status Any
+#$FullListOfUpdates = Get-WsusUpdate -Classification Security -Approval Approved -Status Any
 $UpdatesOnlyFromThisMonth = $FullListOfUpdates | Select update -ExpandProperty update | where {$_.title -like $ThisPatchingYear+"-"+$ThisPatchingMonth+"*"} | select id -ExpandProperty id | select updateid -ExpandProperty UpdateId | select guid -ExpandProperty guid
 
 # Prepare report
@@ -233,6 +233,6 @@ foreach ($targetGroup in $LastPatchingGroups) {
 }
 
 # Export report to CSV
-$report | Export-Csv -Path $outputFile -NoTypeInformation
+$report #| Export-Csv -Path $outputFile -NoTypeInformation
 
 Write-Host "WSUS Failed/Needed Cumulative Updates report for groups $($targetGroups -join ', ') generated successfully at $outputFile"

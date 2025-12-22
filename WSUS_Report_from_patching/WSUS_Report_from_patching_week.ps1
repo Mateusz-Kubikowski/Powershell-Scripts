@@ -1,3 +1,13 @@
+####################################################################
+#                                                                  #
+#  WSUS environment patching automated request                     #
+#                                                                  #
+#  Author:  Mateusz Kubikowski, 2025                               #
+#                                                                  #
+#  ps ver. 1.0                   mod.x/x/x     d/m/y          #
+#                                                                  #
+####################################################################
+
 # Function to check actual patching cycle
    
    function Get-NextPatchingWeek {
@@ -145,7 +155,7 @@
 }
 
 # Get last Friday, Saturday, and Sunday
-$today = (Get-Date).Date.AddDays(-7) 
+$today = (Get-Date).Date
 $dayOfWeek = $today.DayOfWeek
 $daysBack = if ($dayOfWeek -eq 'Monday') { 3 } else { (7 + $dayOfWeek - [int][System.DayOfWeek]::Monday) % 7 + 3 }
 

@@ -232,7 +232,37 @@ foreach ($targetGroup in $LastPatchingGroups) {
     }
 }
 
-# Export report to CSV
-$report #| Export-Csv -Path $outputFile -NoTypeInformation
+#Send report via mail
 
-Write-Host "WSUS Failed/Needed Cumulative Updates report for groups $($targetGroups -join ', ') generated successfully at $outputFile"
+$Month = get-date -Month $ThisPatchingMonth -UFormat "%B"
+$Reduction = $LastPatchingGroups[0].Replace("WUSG_","")
+$Cycle = $reduction1.Replace("_Fri","")
+
+
+$body = $report | ConvertTo-Html -Property ComputerName,ComputerGroup,UpdateTitle,UpdateState,LastReported |Out-String
+
+$EmailFrom = ""
+$EmailTo = ""
+$SubjectAccount = "Report of $Cycle patching cycle for $month with failed Updates at Windows servers - $domain"
+
+$bcc = ""
+
+$BodyAccount =@"
+<p>Hello,</p>
+
+<p>
+Please find below list of Windows servers that were <b>NOT patched</b> during last weekend patching window.
+Please consider the rest of the servers from this patching window patched with the patch date corresponding to their respective patching date.
+The report includes only servers for which <b>$month</b> security patches are applicable.
+The report does not exclude servers removed from patching on demand.
+</p>
+
+$body
+
+<p>
+Best regards,<br>
+Windows Server Team
+</p>
+"@
+
+Send-MailMessage -From $EmailFrom -To $EmailTo -Subject $SubjectAccount -Body $BodyAccount -BodyAsHtml -Bcc $bcc -SmtpServer  -Port 

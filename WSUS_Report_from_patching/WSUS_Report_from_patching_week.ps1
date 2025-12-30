@@ -165,8 +165,18 @@ $lastSunday = $lastFriday.AddDays(2)
 
 # Get Last Patching cycle weekend
 $Patchingweek = Get-PatchingWeeks
-$LastPatchingCycle = $Patchingweek | where {$_.date -eq $lastFriday -or $_.date -eq $lastSaturday -or $_.date -eq $lastSunday}
-$LastPatchingGroups = $LastPatchingCycle | select CyclePoint -ExpandProperty CyclePoint
+$LastPatchingCycle = $Patchingweek | where {
+    $_.date -eq $lastFriday -or
+    $_.date -eq $lastSaturday -or
+    $_.date -eq $lastSunday
+}
+
+if (-not $LastPatchingCycle -or $LastPatchingCycle.Count -eq 0) {
+    return
+}
+
+$LastPatchingGroups = $LastPatchingCycle | Select CyclePoint -ExpandProperty CyclePoint
+
 
 #File name
 $DateFileName = Get-Date -Format "yyyy_MM_dd"
@@ -231,7 +241,6 @@ foreach ($targetGroup in $LastPatchingGroups) {
                     }
     }
 }
-
 #Send report via mail
 
 $Month = (get-date).ToString("MMMM", [System.Globalization.CultureInfo]::GetCultureInfo("en-US"))
@@ -245,7 +254,7 @@ $EmailFrom = ""
 $EmailTo = ""
 $SubjectAccount = "Report of $Cycle patching cycle for $month with failed Updates at Windows servers - $domain"
 
-$bcc = ""
+$cc = "",""
 
 $BodyAccount =@"
 <p>Hello,</p>
@@ -253,8 +262,8 @@ $BodyAccount =@"
 <p>
 Please find below list of Windows servers that were <b>NOT patched</b> during last weekend patching window.
 Please consider the rest of the servers from this patching window patched with the patch date corresponding to their respective patching date.
-The report includes only servers for which <b>$month</b> security patches are applicable.
-The report does not exclude servers removed from patching on demand.
+The report includes only servers for which  <b>$month</b> security patches are applicable.
+The report does not exclude servers removed from patching on demand. If report is empty, it means that all servers from patching cycle were updated.
 </p>
 
 $body
@@ -265,4 +274,4 @@ Windows Server Team
 </p>
 "@
 
-Send-MailMessage -From $EmailFrom -To $EmailTo -Subject $SubjectAccount -Body $BodyAccount -BodyAsHtml -Bcc $bcc -SmtpServer  -Port 
+Send-MailMessage -From $EmailFrom -To $EmailTo -Subject $SubjectAccount -Body $BodyAccount -BodyAsHtml -cc $cc -SmtpServer  -Port 

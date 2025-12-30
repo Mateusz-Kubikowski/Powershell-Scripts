@@ -234,7 +234,7 @@ foreach ($targetGroup in $LastPatchingGroups) {
 
 #Send report via mail
 
-$Month = get-date -Month $ThisPatchingMonth -UFormat "%B"
+$Month = (get-date).ToString("MMMM", [System.Globalization.CultureInfo]::GetCultureInfo("en-US"))
 $Reduction = $LastPatchingGroups[0].Replace("WUSG_","")
 $Cycle = $reduction.Replace("_Fri","")
 

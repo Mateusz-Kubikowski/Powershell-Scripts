@@ -236,7 +236,7 @@ foreach ($targetGroup in $LastPatchingGroups) {
 
 $Month = get-date -Month $ThisPatchingMonth -UFormat "%B"
 $Reduction = $LastPatchingGroups[0].Replace("WUSG_","")
-$Cycle = $reduction1.Replace("_Fri","")
+$Cycle = $reduction.Replace("_Fri","")
 
 
 $body = $report | ConvertTo-Html -Property ComputerName,ComputerGroup,UpdateTitle,UpdateState,LastReported |Out-String

@@ -70,32 +70,42 @@
         # Run for previous cycle (from previous month's second Tuesday)
         foreach ($i in 0..31) {
             $singleDay = $patchStartDate.AddDays($i)
-            if($SuffixCounter -eq 1){$suffix="st"}
-            elseif($SuffixCounter -eq 2){$suffix="nd"}
-            elseif($SuffixCounter -eq 4){$suffix="rd"}
-            elseif($SuffixCounter -eq 4){$suffix="th"}
+            
+            
 
             # Only process Fridays, Saturdays, Sundays within the patching window
             if (($singleDay.DayOfWeek -eq 'Friday') -and ($weekFri -le 4)) {
+                if($weekFri -eq 1){$suffixfri="st"}
+                elseif($weekFri -eq 2){$suffixfri="nd"}
+                elseif($weekFri -eq 3){$suffixfri="rd"}
+                elseif($weekFri -eq 4){$suffixfri="th"}
                 $cycleDayObj = New-Object PSObject
-                $cycleDayObj | Add-Member -MemberType NoteProperty -Name CyclePoint -Value "WUSG_$($weekFri)$($suffix)_Fri"
+                $cycleDayObj | Add-Member -MemberType NoteProperty -Name CyclePoint -Value "WUSG_$($weekFri)$($suffixfri)_Fri"
                 $cycleDayObj | Add-Member -MemberType NoteProperty -Name date -Value $singleDay
                 $totall += $cycleDayObj
                 $weekFri++
-                $SuffixCounter++
+
             }
 
             if (($singleDay.DayOfWeek -eq 'Saturday') -and ($weekSat -le 4)) {
+                if($weekSat -eq 1){$suffixSat="st"}
+                elseif($weekSat -eq 2){$suffixSat="nd"}
+                elseif($weekSat -eq 3){$suffixSat="rd"}
+                elseif($weekSat -eq 4){$suffixSat="th"}
                 $cycleDayObj = New-Object PSObject
-                $cycleDayObj | Add-Member -MemberType NoteProperty -Name CyclePoint -Value "WUSG_$($weekSat)$($suffix)_Sat"
+                $cycleDayObj | Add-Member -MemberType NoteProperty -Name CyclePoint -Value "WUSG_$($weekSat)$($suffixSat)_Sat"
                 $cycleDayObj | Add-Member -MemberType NoteProperty -Name date -Value $singleDay
                 $totall += $cycleDayObj
                 $weekSat++
             }
 
             if (($singleDay.DayOfWeek -eq 'Sunday') -and ($weekSun -le 4)) {
+                if($weekSun -eq 1){$suffixSun="st"}
+                elseif($weekSun -eq 2){$suffixSun="nd"}
+                elseif($weekSun -eq 3){$suffixSun="rd"}
+                elseif($weekSun -eq 4){$suffixSun="th"}
                 $cycleDayObj = New-Object PSObject
-                $cycleDayObj | Add-Member -MemberType NoteProperty -Name CyclePoint -Value "WUSG_$($weekSun)$($suffix)_Sun"
+                $cycleDayObj | Add-Member -MemberType NoteProperty -Name CyclePoint -Value "WUSG_$($weekSun)$($suffixSun)_Sun"
                 $cycleDayObj | Add-Member -MemberType NoteProperty -Name date -Value $singleDay
                 $totall += $cycleDayObj
                 $weekSun++
@@ -254,7 +264,7 @@ $EmailFrom = ""
 $EmailTo = ""
 $SubjectAccount = "Report of $Cycle patching cycle for $month with failed Updates at Windows servers - $domain"
 
-$cc = "",""
+$cc = ""
 
 $BodyAccount =@"
 <p>Hello,</p>
@@ -274,4 +284,4 @@ Windows Server Team
 </p>
 "@
 
-Send-MailMessage -From $EmailFrom -To $EmailTo -Subject $SubjectAccount -Body $BodyAccount -BodyAsHtml -cc $cc -SmtpServer  -Port 
+Send-MailMessage -From $EmailFrom -To $EmailTo -Subject $SubjectAccount -Body $BodyAccount -BodyAsHtml -cc $cc -SmtpServer  -Port 25
